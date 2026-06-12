@@ -180,5 +180,91 @@ def diagnosa(gejala_pasien):
 # ANTARMUKA KONSOL
 # ============================================================
 
+def tampilkan_header():
+    print("\n" + "=" * 65)
+    print("   SISTEM PAKAR DETEKSI RACUN TANAMAN")
+    print("   Metode: Forward Chaining (IF-THEN)")
+    print("=" * 65)
+    print("   Jawab setiap pertanyaan dengan: y (ya) atau t (tidak)")
+    print("=" * 65 + "\n")
 
+
+def tanya_gejala():
+    """Tanyakan gejala satu per satu dan kumpulkan jawaban."""
+    gejala_pasien = []
+    print("[ IDENTIFIKASI GEJALA ]\n")
+    for kode, deskripsi in GEJALA.items():
+        while True:
+            jawab = input(f"  Apakah pasien mengalami: {deskripsi}? (y/t): ").strip().lower()
+            if jawab in ("y", "t"):
+                if jawab == "y":
+                    gejala_pasien.append(kode)
+                break
+            else:
+                print("  ⚠  Masukkan hanya 'y' atau 't'.")
+    return gejala_pasien
+
+
+def tampilkan_hasil(hasil, gejala_pasien):
+    """Tampilkan hasil diagnosa."""
+    print("\n" + "=" * 65)
+    print("   HASIL DIAGNOSA")
+    print("=" * 65)
+
+    if not hasil:
+        print("\n  ✘ Tidak ditemukan pola racun tanaman yang cocok.")
+        print("  Gejala yang dialami tidak sesuai dengan basis pengetahuan.")
+        print("  Silakan konsultasikan ke dokter atau puskesmas terdekat.\n")
+        return
+
+    print(f"\n  Gejala dilaporkan: {len(gejala_pasien)} gejala\n")
+    print("  Tingkat Kesesuaian dengan Jenis Racun:")
+    print("  " + "-" * 55)
+
+    for i, (pid, persen) in enumerate(hasil):
+        rule = RULES[pid]
+        bar_len = int(persen / 2)
+        bar = "█" * bar_len + "░" * (50 - bar_len)
+        print(f"\n  {i+1}. {rule['nama']}")
+        print(f"     [{bar}] {persen}%")
+
+    print("\n" + "=" * 65)
+
+    # Diagnosa utama
+    pid_utama, persen_utama = hasil[0]
+    rule_utama = RULES[pid_utama]
+
+    if persen_utama >= 50:
+        print(f"\n  ✔  DIAGNOSA UTAMA:")
+        print(f"     {rule_utama['nama']}")
+        print(f"     Tingkat kesesuaian: {persen_utama}%")
+        print(f"\n  Tanaman yang mungkin menjadi penyebab:")
+        for tanaman in rule_utama["tanaman"]:
+            print(f"     • {tanaman}")
+        print(f"\n  SARAN PENANGANAN:")
+        print(f"     {rule_utama['saran']}")
+    else:
+        print(f"\n  ⚠  HASIL TIDAK MEYAKINKAN (< 50%)")
+        print(f"     Kemungkinan terdekat: {rule_utama['nama']} ({persen_utama}%)")
+        print(f"     Harap konsultasikan ke dokter untuk pemeriksaan lebih lanjut.")
+
+    print("\n" + "=" * 65)
+    print("  ⚕  CATATAN: Sistem ini hanya alat bantu, bukan pengganti")
+    print("     diagnosis medis. Selalu konsultasi ke tenaga kesehatan.")
+    print("=" * 65 + "\n")
+
+
+def main():
+    tampilkan_header()
+    gejala_pasien = tanya_gejala()
+
+    print("\n  Memproses data gejala...")
+    hasil = diagnosa(gejala_pasien)
+    tampilkan_hasil(hasil, gejala_pasien)
+
+    input("  Tekan Enter untuk keluar...")
+
+
+if __name__ == "__main__":
+    main()
 
